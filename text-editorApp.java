@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -7,74 +8,61 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-public class Text_Editor extends JFrame implements ActionListener {
+public class SimpleTextEditor extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
-    private JTextArea textArea;
-    private JButton openButton, saveButton;
+    private JTextArea editorArea;
+    private JButton btnOpen, btnSave;
 
-    public Text_Editor() {
-        super("Text Editor");
+    public SimpleTextEditor() {
+        super("Simple Text Editor");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        textArea = new JTextArea();
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        getContentPane().add(scrollPane, BorderLayout.CENTER);
+        editorArea = new JTextArea();
+        JScrollPane scrollContainer = new JScrollPane(editorArea);
+        getContentPane().add(scrollContainer, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel();
-        getContentPane().add(buttonPanel, BorderLayout.PAGE_START);
+        getContentPane().add(buttonPanel, BorderLayout.NORTH);
 
-        openButton = new JButton("Open");
-        openButton.addActionListener(this);
-        buttonPanel.add(openButton);
+        btnOpen = new JButton("Open File");
+        btnOpen.addActionListener(this);
+        buttonPanel.add(btnOpen);
 
-        saveButton = new JButton("Save");
-        saveButton.addActionListener(this);
-        buttonPanel.add(saveButton);
+        btnSave = new JButton("Save File");
+        btnSave.addActionListener(this);
+        buttonPanel.add(btnSave);
 
         setVisible(true);
     }
 
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == openButton) {
+    @Override
+    public void actionPerformed(ActionEvent event) {
+        if (event.getSource() == btnOpen) {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
-            int returnVal = fileChooser.showOpenDialog(this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                try {
-                    FileReader reader = new FileReader(fileChooser.getSelectedFile());
-                    BufferedReader br = new BufferedReader(reader);
-                    String line;
-                    StringBuilder sb = new StringBuilder();
-                    while ((line = br.readLine()) != null) {
-                        sb.append(line).append("\n");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Text Files", "txt"));
+            int selection = fileChooser.showOpenDialog(this);
+            if (selection == JFileChooser.APPROVE_OPTION) {
+                try (BufferedReader br = new BufferedReader(new FileReader(fileChooser.getSelectedFile()))) {
+                    StringBuilder content = new StringBuilder();
+                    String currentLine;
+                    while ((currentLine = br.readLine()) != null) {
+                        content.append(currentLine).append("\n");
                     }
-                    textArea.setText(sb.toString());
-                    br.close();
-                    reader.close();
+                    editorArea.setText(content.toString());
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }
-        } else if (e.getSource() == saveButton) {
+        } else if (event.getSource() == btnSave) {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
-            int returnVal = fileChooser.showSaveDialog(this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                try {
-                    FileWriter writer = new FileWriter(fileChooser.getSelectedFile());
-                    writer.write(textArea.getText());
-                    writer.close();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Text Files", "txt"));
+            int selection = fileChooser.showSaveDialog(this);
+            if (selection == JFileChooser.APPROVE_OPTION) {
+                try (FileWriter writer = new FileWriter(fileChooser.getSelectedFile())) {
+                    writer.write(editorArea.getText());
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -83,7 +71,6 @@ public class Text_Editor extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        new Text_Editor();
+        new SimpleTextEditor();
     }
-
 }
